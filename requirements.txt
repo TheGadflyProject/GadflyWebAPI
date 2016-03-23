@@ -6,6 +6,7 @@ feedfinder2==0.0.4
 feedparser==5.2.1
 flake8==2.5.4
 Flask==0.10.1
+gunicorn==19.4.5
 idna==2.1
 itsdangerous==0.24
 jieba3k==0.35.1
