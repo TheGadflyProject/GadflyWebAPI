@@ -1,46 +1,44 @@
-from flask import Flask, request, render_template, jsonify, abort, make_response, url_for
+from flask import Flask, request, jsonify, make_response
 from newspaper import Article
+from TheGadflyProject.gadfly import gap_fill_generator as gfg
 
 # output:
 # [
 #   {
 #         'question': question_text,
 #         'answer': answer_text,
-#         'question_type': question_type, 
+#         'question_type': question_type,
 #         'source_sentence': source_sentence
-#   }, 
+#   },
 #   {..}, {..}, {..}
 # ]
 
 app = Flask(__name__)
 
+
 # use this method to get questions
 @app.route('/gadfly/api/v1.0/questions', methods=['GET'])
 def get_questions():
     url = request.args.get('url')
-    articleText = get_article_text(url)
-    # send articleText to nlp, get a list of dict
-    return jsonify({'questions': [make_public_question(question) for question in questions]})
+    article_text = get_article_text(url)
+    questions = generate_questions(article_text)
+    for key in ["_type", "_subtype"]:
+        for q in questions:
+            q.pop(key)
+    return jsonify({'questions': [questions]})
 
-@app.route('/gadfly/api/v1.0/questions/<int:question_id>', methods=['GET'])
-def get_question(question_id):
-    question = [question for question in questions if question['id'] == question_id]
-    if len(question) == 0:
-        abort(404)
-    return jsonify({'questions': [make_public_question(question) for question in questions]})
 
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
-def make_public_question(question):
-    new_question = {}
-    for field in question:
-        if field == 'id':
-            new_question['uri'] = url_for('get_question', question_id=question['id'], _external=True)
-        else:
-            new_question[field] = question[field]
-    return new_question
+
+def generate_questions(article_text):
+    blank_types = [gfg.GapFillBlankType.named_entities,
+                   gfg.GapFillBlankType.noun_phrases]
+    q_gen = gfg.GapFillGenerator(article_text, blank_types)
+    return q_gen.output_to_list()
+
 
 def get_article_text(url):
     article = Article(url)
@@ -49,4 +47,4 @@ def get_article_text(url):
     return article.text.replace("\n", "")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=8081)
