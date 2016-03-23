@@ -7,7 +7,6 @@ from TheGadflyProject.gadfly import gap_fill_generator as gfg
 #   {
 #         'question': question_text,
 #         'answer': answer_text,
-#         'question_type': question_type,
 #         'source_sentence': source_sentence
 #   },
 #   {..}, {..}, {..}
@@ -37,7 +36,7 @@ def generate_questions(article_text):
     blank_types = [gfg.GapFillBlankType.named_entities,
                    gfg.GapFillBlankType.noun_phrases]
     q_gen = gfg.GapFillGenerator(article_text, blank_types)
-    return q_gen.output_to_list()
+    return q_gen.output_questions_to_list()
 
 
 def get_article_text(url):
