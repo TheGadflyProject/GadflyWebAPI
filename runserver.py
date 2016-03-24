@@ -15,7 +15,7 @@ from spacy.en import download
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
-download.main(data_size='all', force=False)
+download.main(data_size='all', force=True)
 
 
 # use this method to get questions
