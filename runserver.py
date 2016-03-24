@@ -13,6 +13,7 @@ from TheGadflyProject.gadfly import gap_fill_generator as gfg
 # ]
 
 app = Flask(__name__)
+app.config['DEBUG'] = True
 
 
 # use this method to get questions
