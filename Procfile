@@ -1,1 +1,1 @@
-web: gunicorn runserver:app --log-level debug --log-file -
+web: gunicorn runserver:app --timeout 300 --graceful-timeout 300 --log-level debug --log-file -
