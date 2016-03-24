@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify, make_response
 from newspaper import Article
 from TheGadflyProject.gadfly import gap_fill_generator as gfg
-from spacy.en import download
 
 # output:
 # [
@@ -15,7 +14,6 @@ from spacy.en import download
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
-download.main(data_size='all', force=True)
 
 
 # use this method to get questions
