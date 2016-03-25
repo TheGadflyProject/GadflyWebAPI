@@ -1,7 +1,10 @@
 from flask import Flask, request, jsonify, make_response
 from newspaper import Article
 from TheGadflyProject.gadfly import gap_fill_generator as gfg
+import sputnik
+import spacy.about
 
+package = sputnik.install('spacy', spacy.about.__version__, spacy.about.__default_model__)
 # output:
 # [
 #   {
