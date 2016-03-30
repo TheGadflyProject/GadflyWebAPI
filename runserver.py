@@ -3,8 +3,12 @@ from newspaper import Article
 from TheGadflyProject.gadfly import gap_fill_generator as gfg
 import sputnik
 import spacy.about
+import os
 
-package = sputnik.install('spacy', spacy.about.__version__, spacy.about.__default_model__)
+
+SPACY_VERSION = os.environ['SPACY_VERSION'] if os.environ['SPACY_VERSION'] else spacy.about.__version__
+SPACY_DEFAULT_MODEL = os.environ['SPACY_DEFAULT_MODEL'] if os.environ['SPACY_DEFAULT_MODEL'] else spacy.about.__default_model__
+package = sputnik.install('spacy', SPACY_VERSION, SPACY_DEFAULT_MODEL)
 # output:
 # [
 #   {
