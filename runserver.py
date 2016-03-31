@@ -4,6 +4,8 @@ from TheGadflyProject.gadfly import gap_fill_generator as gfg
 import sputnik
 import spacy.about
 import os
+from flask.ext.cors import CORS, cross_origin
+
 
 if not(os.path.exists("/app/.heroku/python/lib/python3.4/site-packages/spacy/data")):
 	SPACY_VERSION = os.environ['SPACY_VERSION'] if os.environ['SPACY_VERSION'] else spacy.about.__version__
@@ -24,10 +26,12 @@ if not(os.path.exists("/app/.heroku/python/lib/python3.4/site-packages/spacy/dat
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
-
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 # use this method to get questions
 @app.route('/gadfly/api/v1.0/questions', methods=['GET'])
+@cross_origin()
 def get_questions():
     url = request.args.get('url')
     article_text = get_article_text(url)
