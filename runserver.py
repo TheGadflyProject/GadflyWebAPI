@@ -39,7 +39,7 @@ def get_questions():
     for key in ["_type", "_subtype"]:
         for q in questions:
             q.pop(key)
-    return jsonify({'questions': [questions]})
+    return jsonify({'questions': questions})
 
 
 @app.errorhandler(404)
