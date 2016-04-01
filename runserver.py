@@ -50,7 +50,8 @@ def not_found(error):
 def generate_questions(article_text):
     blank_types = [gfg.GapFillBlankType.named_entities,
                    gfg.GapFillBlankType.noun_phrases]
-    q_gen = gfg.GapFillGenerator(article_text, blank_types)
+    q_gen = gfg.GapFillGenerator(article_text, gap_types=blank_types,
+                                 summarizer=gfg.tfidf)
     return q_gen.output_questions_to_list()
 
 
