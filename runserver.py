@@ -3,6 +3,7 @@ from newspaper import Article
 from TheGadflyProject.gadfly import gap_fill_generator as gfg
 import os
 from flask.ext.cors import CORS, cross_origin
+import re
 
 # output:
 # [
@@ -49,7 +50,15 @@ def get_article_text(url):
     article = Article(url)
     article.download()
     article.parse()
-    return article.text.replace("\n", "")
+    return clean_text(article.text)
 
+
+def clean_text(article):
+    article = (re.sub(("“"),'"',article))
+    article = (re.sub(("”"),'"',article))
+    article = (re.sub(("’"),"'",article))
+    return (re.sub(("[\n*]"),"",article))
+    
+    
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=8081)
