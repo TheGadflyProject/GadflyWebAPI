@@ -63,7 +63,7 @@ def clean_text(article):
     article = re.sub("’", "'", article)
     article = re.sub("Advertisement ", "", article)
     article = re.sub("Continue reading the main story", "", article)
-    return re.sub("[\n*]", "", article)
+    return re.sub("[\n*]", " ", article)
 
 
 if __name__ == '__main__':
