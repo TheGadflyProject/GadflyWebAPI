@@ -1,24 +1,20 @@
 from flask import Flask, request, jsonify, make_response
-from newspaper import Article
+from newspaper import Article, Config
 from TheGadflyProject.gadfly import gap_fill_generator as gfg
-import os
 from flask.ext.cors import CORS, cross_origin
 import re
 
-# output:
-# [
-#   {
-#         'question': question_text,
-#         'answer': answer_text,
-#         'source_sentence': source_sentence
-#   },
-#   {..}, {..}, {..}
-# ]
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
+
+
+# Newspaper Config
+config = Config()
+config.fetch_images = False
+
 
 # use this method to get questions
 @app.route('/gadfly/api/v1.0/questions', methods=['GET'])
@@ -31,6 +27,14 @@ def get_questions():
         for q in questions:
             q.pop(key)
     return jsonify({'questions': questions})
+
+
+@app.route('/gadfly/api/v1.0/article', methods=['GET'])
+@cross_origin()
+def get_article():
+    url = request.args.get('url')
+    article_text = get_article_text(url)
+    return (article_text)
 
 
 @app.errorhandler(404)
@@ -47,18 +51,20 @@ def generate_questions(article_text):
 
 
 def get_article_text(url):
-    article = Article(url)
+    article = Article(url, config)
     article.download()
     article.parse()
     return clean_text(article.text)
 
 
 def clean_text(article):
-    article = (re.sub(("“"),'"',article))
-    article = (re.sub(("”"),'"',article))
-    article = (re.sub(("’"),"'",article))
-    return (re.sub(("[\n*]"),"",article))
-    
-    
+    article = re.sub("“", '"', article)
+    article = re.sub("”", '"', article)
+    article = re.sub("’", "'", article)
+    article = re.sub("Advertisement ", "", article)
+    article = re.sub("Continue reading the main story", "", article)
+    return re.sub("[\n*]", "", article)
+
+
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=8081)
