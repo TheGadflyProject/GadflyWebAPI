@@ -26,6 +26,7 @@ def get_questions():
     for key in ["_type", "_subtype"]:
         for q in questions:
             q.pop(key)
+    print(questions)
     return jsonify({'questions': questions})
 
 
