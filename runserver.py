@@ -32,6 +32,15 @@ def get_questions():
     for key in ["_type", "_subtype"]:
         for q in questions:
             q.pop(key)
+    try:
+        db.session.add(QuestionGenRequest(
+                    url=url,
+                    questions=questions,
+                    question_type="gap_fill",
+                ))
+        db.session.commit()
+    except:
+        print("Unable to add item to database.")
     print(questions)
     return jsonify({'questions': questions})
 
