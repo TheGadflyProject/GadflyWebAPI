@@ -2,22 +2,28 @@ from flask import Flask, request, jsonify, make_response
 from newspaper import Article, Config
 from TheGadflyProject.gadfly import gap_fill_generator as gfg
 from flask.ext.cors import CORS, cross_origin
+from flask.ext.sqlalchemy import SQLAlchemy
 import re
-
+import os
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
-
-
 # Newspaper Config
 config = Config()
 config.fetch_images = False
+# Postgres Config
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+db = SQLAlchemy(app)
+
+
+from models import QuestionGenRequest
 
 
 # use this method to get questions
-@app.route('/gadfly/api/v1.0/questions', methods=['GET'])
+@app.route('/gadfly/api/v1.0/gap_fill_questions', methods=['GET'])
 @cross_origin()
 def get_questions():
     url = request.args.get('url')
