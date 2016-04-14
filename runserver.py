@@ -3,8 +3,10 @@ from newspaper import Article, Config
 from TheGadflyProject.gadfly import gap_fill_generator as gfg
 from flask.ext.cors import CORS, cross_origin
 from flask.ext.sqlalchemy import SQLAlchemy
+from urllib.parse import urlparse
 import re
 import os
+
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -53,6 +55,13 @@ def get_article():
     return (article_text)
 
 
+@app.route('/gadfly/api/v1.0/admin_stats', method=['GET'])
+@cross_origin()
+def get_stats():
+    stats = QuestionGenRequest.query.all()
+    return jsonify({'results:': stats})
+
+
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
@@ -67,6 +76,8 @@ def generate_questions(article_text):
 
 
 def get_article_text(url):
+    if (urlparse(url).netloc == "www.nytimes.com"):
+        url = re.sub("www.nytimes.com", "mobile.nytimes.com", url)
     article = Article(url, config)
     article.download()
     article.parse()
