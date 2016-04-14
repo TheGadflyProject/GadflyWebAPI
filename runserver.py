@@ -55,13 +55,6 @@ def get_article():
     return (article_text)
 
 
-@app.route('/gadfly/api/v1.0/admin_stats', method=['GET'])
-@cross_origin()
-def get_stats():
-    stats = QuestionGenRequest.query.all()
-    return jsonify({'results:': stats})
-
-
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
@@ -76,8 +69,10 @@ def generate_questions(article_text):
 
 
 def get_article_text(url):
-    if (urlparse(url).netloc == "www.nytimes.com"):
-        url = re.sub("www.nytimes.com", "mobile.nytimes.com", url)
+    up = urlparse(url)
+    if (up.netloc == "www.nytimes.com"):
+        # url = re.sub("www.nytimes.com", "mobile.nytimes.com", url)
+        print(url)
     article = Article(url, config)
     article.download()
     article.parse()
