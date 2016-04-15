@@ -21,13 +21,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 db = SQLAlchemy(app)
 
 
-from models import QuestionGenRequest
+from models import QuestionGenRequest, NewsArticle, Question
 
 
 # use this method to get questions
 @app.route('/gadfly/api/v1.0/gap_fill_questions', methods=['GET'])
 @cross_origin()
-def get_questions():
+def get_gap_fill_questions():
     url = request.args.get('url')
     article_text = get_article_text(url)
     questions = generate_questions(article_text)
@@ -40,10 +40,29 @@ def get_questions():
                     questions=questions,
                     question_type="gap_fill",
                 ))
+        parsed_url = urlparse(url)
+        db.session.add(
+                NewsArticle(
+                    url=url,
+                    article_text=article_text,
+                    domain=parsed_url.netloc
+                ))
+        question_objects = []
+        for q in questions:
+            question_objects.append(
+                    Question(
+                        question_text=q.question,
+                        # answer_choices=[],
+                        correct_answer=q.answer,
+                        # reactions=[],
+                        good_question_votes=0,
+                        bad_question_votes=0
+                    )
+            )
+        db.session.bulk_save_objects(question_objects)
         db.session.commit()
     except:
         print("Unable to add item to database.")
-    print(questions)
     return jsonify({'questions': questions})
 
 
