@@ -36,6 +36,7 @@ class Question(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     question_text = db.Column(db.Text())
+    source_sentence = db.Column(db.Text())
     # answer_choices = db.Column(ARRAY(Integer))
     correct_answer = db.Column(db.String())
     # reactions = db.Column(ARRAY(Integer))

@@ -31,34 +31,50 @@ def get_gap_fill_questions():
     url = request.args.get('url')
     article_text = get_article_text(url)
     questions = generate_questions(article_text)
+
     for key in ["_type", "_subtype"]:
         for q in questions:
             q.pop(key)
+
     try:
+        print("qgen request")
         db.session.add(QuestionGenRequest(
                     url=url,
                     questions=questions,
                     question_type="gap_fill",
                 ))
+        db.session.commit()
+    except Exception as e:
+        print(e)
+
+    try:
+        print("news article")
         parsed_url = urlparse(url)
         db.session.add(
                 NewsArticle(
                     url=url,
-                    article_text=article_text,
+                    article_text=article_text.strip(),
                     domain=parsed_url.netloc
                 ))
-        question_objects = []
-        for q in questions:
-            question_objects.append(
-                    Question(
-                        question_text=q.question,
-                        # answer_choices=[],
-                        correct_answer=q.answer,
-                        # reactions=[],
-                        good_question_votes=0,
-                        bad_question_votes=0
-                    )
+        db.session.commit()
+    except Exception as e:
+        print(e)
+
+    question_objects = []
+    for q in questions:
+        question_objects.append(
+            Question(
+                question_text=q.get("question"),
+                source_sentence=q.get("source_sentence"),
+                # answer_choices=[],
+                correct_answer=q.get("answer"),
+                # reactions=[],
+                good_question_votes=0,
+                bad_question_votes=0
             )
+        )
+
+    try:
         db.session.bulk_save_objects(question_objects)
         db.session.commit()
     except Exception as e:
