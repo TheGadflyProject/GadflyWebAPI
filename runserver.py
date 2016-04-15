@@ -69,10 +69,10 @@ def generate_questions(article_text):
 
 
 def get_article_text(url):
-    up = urlparse(url)
-    if (up.netloc == "www.nytimes.com"):
+    # up = urlparse(url)
+    # if (up.netloc == "www.nytimes.com"):
         # url = re.sub("www.nytimes.com", "mobile.nytimes.com", url)
-        print(url)
+        # print(url)
     article = Article(url, config)
     article.download()
     article.parse()
