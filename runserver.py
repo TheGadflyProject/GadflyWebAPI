@@ -61,8 +61,9 @@ def get_gap_fill_questions():
             )
         db.session.bulk_save_objects(question_objects)
         db.session.commit()
-    except:
+    except Exception as e:
         print("Unable to add item to database.")
+        print(e)
     return jsonify({'questions': questions})
 
 
