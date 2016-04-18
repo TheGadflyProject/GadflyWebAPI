@@ -4,8 +4,10 @@ from TheGadflyProject.gadfly import gap_fill_generator as gfg
 from flask.ext.cors import CORS, cross_origin
 from flask.ext.sqlalchemy import SQLAlchemy
 from urllib.parse import urlparse
+from hashlib import md5
 import re
 import os
+
 
 
 app = Flask(__name__)
@@ -37,7 +39,6 @@ def get_gap_fill_questions():
             q.pop(key)
 
     try:
-        print("qgen request")
         db.session.add(QuestionGenRequest(
                     url=url,
                     questions=questions,
@@ -48,10 +49,11 @@ def get_gap_fill_questions():
         print(e)
 
     try:
-        print("news article")
         parsed_url = urlparse(url)
+        article_id = md5(article_text.strip().encode('utf-8'))
         db.session.add(
                 NewsArticle(
+                    id=article_id.hexdigest(),
                     url=url,
                     article_text=article_text.strip(),
                     domain=parsed_url.netloc
@@ -62,8 +64,10 @@ def get_gap_fill_questions():
 
     question_objects = []
     for q in questions:
+        q_id = md5(q.get('question').encode('utf-8'))
         question_objects.append(
             Question(
+                id=q_id.hexdigest(),
                 question_text=q.get("question"),
                 source_sentence=q.get("source_sentence"),
                 # answer_choices=[],

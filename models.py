@@ -1,6 +1,6 @@
 from runserver import db
 from sqlalchemy.dialects.postgresql import JSON, ARRAY
-from sqlalchemy import Integer
+# from sqlalchemy import Integer
 
 
 class QuestionGenRequest(db.Model):
@@ -23,7 +23,7 @@ class QuestionGenRequest(db.Model):
 class NewsArticle(db.Model):
     __tablename__ = 'news_article'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(), primary_key=True)
     url = db.Column(db.String())
     article_text = db.Column(db.Text())
     domain = db.Column(db.String())
@@ -34,7 +34,7 @@ class NewsArticle(db.Model):
 class Question(db.Model):
     __tablename__ = 'question'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(), primary_key=True)
     question_text = db.Column(db.Text())
     source_sentence = db.Column(db.Text())
     # answer_choices = db.Column(ARRAY(Integer))
@@ -42,4 +42,4 @@ class Question(db.Model):
     # reactions = db.Column(ARRAY(Integer))
     good_question_votes = db.Column(db.Integer)
     bad_question_votes = db.Column(db.Integer)
-    news_article_id = db.Column(db.Integer, db.ForeignKey('news_article.id'))
+    news_article_id = db.Column(db.String(), db.ForeignKey('news_article.id'))
