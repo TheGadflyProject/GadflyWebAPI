@@ -24,6 +24,7 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
 from models import QuestionGenRequest, NewsArticle, Question, QuestionSchema
+question_schema = QuestionSchema(many=True)
 
 
 # use this method to get questions
@@ -90,7 +91,6 @@ def get_gap_fill_questions():
                 print(e)
 
     news_article = NewsArticle.query.get(article_id.hexdigest())
-    question_schema = QuestionSchema(many=True)
     questions = question_schema.dumps(news_article.questions.all()).data
     return jsonify({
             'num_questions': num_questions,
@@ -98,17 +98,45 @@ def get_gap_fill_questions():
             })
 
 
-@app.route('/gadfly/api/v1.0/question', methods=['GET'])
+@app.route('/gadfly/api/v1.0/question/<q_id>', methods=['GET'])
 @cross_origin()
-def question():
-    q_id = request.args.get('id')
+def question(q_id):
     question = {}
     try:
         question = Question.query.get(q_id)
+        question = question_schema.dumps([question]).data
     except Exception as e:
-        print("Unable to add item to database.")
         print(e)
-    return jsonify(question)
+        print("unable to find {} in database".format(q_id))
+    return jsonify({"question": question})
+
+
+@app.route('/gadfly/api/v1.0/good_question/<q_id>', methods=['POST'])
+@cross_origin()
+def good_question(q_id):
+    try:
+        question = Question.query.get(q_id)
+        question.good_question_votes += 1
+        db.session.commit()
+        return jsonify({'status': "success"})
+    except Exception as e:
+        print(e)
+        print("unable to find {} in database".format(q_id))
+        return jsonify({"status": "failed"})
+
+
+@app.route('/gadfly/api/v1.0/bad_question/<q_id>', methods=['POST'])
+@cross_origin()
+def bad_question(q_id):
+    try:
+        question = Question.query.get(q_id)
+        question.bad_question_votes += 1
+        db.session.commit()
+        return jsonify({'status': "success"})
+    except Exception as e:
+        print(e)
+        print("unable to find {} in database".format(q_id))
+        return jsonify({"status": "failed"})
 
 
 @app.route('/gadfly/api/v1.0/article', methods=['GET'])
