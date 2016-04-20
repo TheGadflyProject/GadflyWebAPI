@@ -3,11 +3,11 @@ from newspaper import Article, Config
 from TheGadflyProject.gadfly import gap_fill_generator as gfg
 from flask.ext.cors import CORS, cross_origin
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
 from urllib.parse import urlparse
 from hashlib import md5
 import re
 import os
-
 
 
 app = Flask(__name__)
@@ -21,9 +21,9 @@ config.fetch_images = False
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 db = SQLAlchemy(app)
+ma = Marshmallow(app)
 
-
-from models import QuestionGenRequest, NewsArticle, Question
+from models import QuestionGenRequest, NewsArticle, Question, QuestionSchema
 
 
 # use this method to get questions
@@ -33,6 +33,7 @@ def get_gap_fill_questions():
     url = request.args.get('url')
     article_text = get_article_text(url)
     questions = generate_questions(article_text)
+    num_questions = len(questions)
 
     for key in ["_type", "_subtype"]:
         for q in questions:
@@ -51,40 +52,63 @@ def get_gap_fill_questions():
     try:
         parsed_url = urlparse(url)
         article_id = md5(article_text.strip().encode('utf-8'))
-        db.session.add(
+
+        if not NewsArticle.query.get(article_id.hexdigest()):
+            db.session.add(
                 NewsArticle(
                     id=article_id.hexdigest(),
                     url=url,
                     article_text=article_text.strip(),
                     domain=parsed_url.netloc
                 ))
-        db.session.commit()
+            db.session.commit()
     except Exception as e:
         print(e)
 
-    question_objects = []
     for q in questions:
         q_id = md5(q.get('question').encode('utf-8'))
-        question_objects.append(
-            Question(
-                id=q_id.hexdigest(),
-                question_text=q.get("question"),
-                source_sentence=q.get("source_sentence"),
-                # answer_choices=[],
-                correct_answer=q.get("answer"),
-                # reactions=[],
-                good_question_votes=0,
-                bad_question_votes=0
-            )
-        )
 
+        if not Question.query.get(q_id.hexdigest()):
+            try:
+                db.session.add(
+                    Question(
+                        id=q_id.hexdigest(),
+                        question_text=q.get("question"),
+                        source_sentence=q.get("source_sentence"),
+                        # answer_choices=[],
+                        correct_answer=q.get("answer"),
+                        # reactions=[],
+                        good_question_votes=0,
+                        bad_question_votes=0,
+                        news_article_id=article_id.hexdigest()
+                    )
+                )
+
+                db.session.commit()
+            except Exception as e:
+                print("Unable to add item to database.")
+                print(e)
+
+    news_article = NewsArticle.query.get(article_id.hexdigest())
+    question_schema = QuestionSchema(many=True)
+    questions = question_schema.dumps(news_article.questions.all()).data
+    return jsonify({
+            'num_questions': num_questions,
+            'questions': questions
+            })
+
+
+@app.route('/gadfly/api/v1.0/question', methods=['GET'])
+@cross_origin()
+def question():
+    q_id = request.args.get('id')
+    question = {}
     try:
-        db.session.bulk_save_objects(question_objects)
-        db.session.commit()
+        question = Question.query.get(q_id)
     except Exception as e:
         print("Unable to add item to database.")
         print(e)
-    return jsonify({'questions': questions})
+    return jsonify(question)
 
 
 @app.route('/gadfly/api/v1.0/article', methods=['GET'])

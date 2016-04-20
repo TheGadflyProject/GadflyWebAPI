@@ -1,4 +1,4 @@
-from runserver import db
+from runserver import db, ma
 from sqlalchemy.dialects.postgresql import JSON, ARRAY
 # from sqlalchemy import Integer
 
@@ -43,3 +43,13 @@ class Question(db.Model):
     good_question_votes = db.Column(db.Integer)
     bad_question_votes = db.Column(db.Integer)
     news_article_id = db.Column(db.String(), db.ForeignKey('news_article.id'))
+
+
+class NewsArticleSchema(ma.ModelSchema):
+    class Meta:
+        model = NewsArticle
+
+
+class QuestionSchema(ma.ModelSchema):
+    class Meta:
+        model = Question

@@ -19,6 +19,8 @@ Jinja2==2.8
 lxml==3.6.0
 Mako==1.0.4
 MarkupSafe==0.23
+marshmallow==2.7.1
+marshmallow-sqlalchemy==0.8.1
 mccabe==0.4.0
 murmurhash==0.26.1
 newspaper3k==0.1.7
