@@ -91,7 +91,7 @@ def get_gap_fill_questions():
                 print(e)
 
     news_article = NewsArticle.query.get(article_id.hexdigest())
-    questions = question_schema.dumps(news_article.questions.all()).data
+    questions = question_schema.dump(news_article.questions.all()).data
     return jsonify({
             'num_questions': num_questions,
             'questions': questions
@@ -104,7 +104,7 @@ def question(q_id):
     question = {}
     try:
         question = Question.query.get(q_id)
-        question = question_schema.dumps([question]).data
+        question = question_schema.dump([question]).data
     except Exception as e:
         print(e)
         print("unable to find {} in database".format(q_id))
