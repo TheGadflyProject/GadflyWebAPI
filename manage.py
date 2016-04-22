@@ -4,7 +4,7 @@ from flask.ext.migrate import Migrate, MigrateCommand
 from runserver import app, db
 
 
-migrate = Migrate(app, db)
+migrate = Migrate(app, db, compare_type=True)
 manager = Manager(app)
 
 manager.add_command('db', MigrateCommand)

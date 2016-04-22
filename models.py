@@ -1,6 +1,5 @@
 from runserver import db, ma
 from sqlalchemy.dialects.postgresql import JSON, ARRAY
-# from sqlalchemy import Integer
 
 
 class QuestionGenRequest(db.Model):
@@ -10,11 +9,6 @@ class QuestionGenRequest(db.Model):
     url = db.Column(db.String())
     questions = db.Column(JSON)
     question_type = db.Column(db.String())
-
-    def __init__(self, url, questions, question_type):
-        self.url = url
-        self.questions = questions
-        self.question_type = question_type
 
     def __repr__(self):
         return '<id {}'.format(self.id)
@@ -37,12 +31,24 @@ class Question(db.Model):
     id = db.Column(db.String(), primary_key=True)
     question_text = db.Column(db.Text())
     source_sentence = db.Column(db.Text())
-    # answer_choices = db.Column(ARRAY(Integer))
+    answer_choices = db.relationship('AnswerChoice', backref='question',
+                                     lazy='dynamic')
     correct_answer = db.Column(db.String())
-    # reactions = db.Column(ARRAY(Integer))
+    # reactions = db.Column(ARRAY())
     good_question_votes = db.Column(db.Integer)
     bad_question_votes = db.Column(db.Integer)
     news_article_id = db.Column(db.String(), db.ForeignKey('news_article.id'))
+
+
+class AnswerChoice(db.Model):
+    __tablename__ = "answer_choice"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    question_id = db.Column(db.String(), db.ForeignKey('question.id'))
+    answer = db.Column(db.String())
+
+    def __repr__(self):
+        return '<answer: {}>'.format(self.answer)
 
 
 class NewsArticleSchema(ma.ModelSchema):
@@ -53,3 +59,8 @@ class NewsArticleSchema(ma.ModelSchema):
 class QuestionSchema(ma.ModelSchema):
     class Meta:
         model = Question
+
+
+class AnswerChoice(ma.ModelSchema):
+    class Meta:
+        model = AnswerChoice
