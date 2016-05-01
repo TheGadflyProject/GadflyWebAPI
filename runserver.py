@@ -233,20 +233,17 @@ def not_found(error):
 
 
 def generate_gap_fill_questions(article_text):
-    blank_types = [gfg.GapFillBlankType.named_entities]
-    q_gen = gfg.GapFillGenerator(article_text, gap_types=blank_types)
+    q_gen = gfg.GapFillGenerator(article_text)
     return q_gen.output_questions()
 
 
 def generate_multiple_choice_questions(article_text):
-    blank_types = [gfg.GapFillBlankType.named_entities]
-    q_gen = mcq.MCQGenerator(article_text, gap_types=blank_types)
+    q_gen = mcq.MCQGenerator(article_text)
     return q_gen.output_questions()
 
 
 def top_sentences(article_text):
-    blank_types = [gfg.GapFillBlankType.named_entities]
-    q_gen = qgen.QGenerator(article_text, gap_types=blank_types)
+    q_gen = qgen.QGenerator(article_text)
     return q_gen._top_sents
 
 
