@@ -34,7 +34,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 
 # use this method to get questions
-@app.route('/gadfly/api/v1.0/gap_fill_questions', methods=['GET'])
+@app.route('/api/gap_fill_questions', methods=['GET'])
 @cross_origin()
 def get_gap_fill_questions():
     url = request.args.get('url')
@@ -47,11 +47,8 @@ def get_gap_fill_questions():
             q.pop(key)
 
     try:
-        db.session.add(QuestionGenRequest(
-                    url=url,
-                    questions=questions,
-                    question_type="gap_fill",
-                ))
+        db.session.add(QuestionGenRequest(url=url, questions=questions,
+                                          question_type="gap_fill"))
         db.session.commit()
     except Exception as e:
         print(e)
@@ -62,12 +59,10 @@ def get_gap_fill_questions():
 
         if not NewsArticle.query.get(article_id.hexdigest()):
             db.session.add(
-                NewsArticle(
-                    id=article_id.hexdigest(),
-                    url=url,
-                    article_text=article_text.strip(),
-                    domain=parsed_url.netloc
-                ))
+                NewsArticle(id=article_id.hexdigest(), url=url,
+                            article_text=article_text.strip(),
+                            domain=parsed_url.netloc)
+            )
             db.session.commit()
     except Exception as e:
         print(e)
@@ -78,18 +73,11 @@ def get_gap_fill_questions():
         if not Question.query.get(q_id.hexdigest()):
             try:
                 db.session.add(
-                    Question(
-                        id=q_id.hexdigest(),
-                        question_text=q.get("question"),
-                        source_sentence=q.get("source_sentence"),
-                        correct_answer=q.get("answer"),
-                        # reactions=[],
-                        good_question_votes=0,
-                        bad_question_votes=0,
-                        news_article_id=article_id.hexdigest()
-                    )
+                    Question(id=q_id.hexdigest(), question_text=q.get("question"),
+                             source_sentence=q.get("source_sentence"),
+                             correct_answer=q.get("answer"), good_question_votes=0,
+                             bad_question_votes=0, news_article_id=article_id.hexdigest())
                 )
-
                 db.session.commit()
 
             except Exception as e:
@@ -105,13 +93,12 @@ def get_gap_fill_questions():
 
 
 # use this method to get questions
-@app.route('/gadfly/api/v1.0/multiple_choice_questions', methods=['GET'])
+@app.route('/api/multiple_choice_questions', methods=['GET'])
 @cross_origin()
 def get_multiple_choice_questions():
     url = request.args.get('url')
     article_text = get_article_text(url)
     questions = generate_multiple_choice_questions(article_text)
-    pp.pprint(questions)
     num_questions = len(questions)
 
     for key in ["_type", "_subtype"]:
@@ -164,12 +151,10 @@ def get_multiple_choice_questions():
                 db.session.commit()
 
                 for answer_choice in q.get("answer_choices"):
-                    # print("answer choice: ", answer_choice)
                     ac = AnswerChoice(
                             question_id=q_id.hexdigest(),
                             answer=answer_choice
                             )
-                    # print(ac)
                     db.session.add(ac)
                     db.session.commit()
 
@@ -185,7 +170,7 @@ def get_multiple_choice_questions():
             })
 
 
-@app.route('/gadfly/api/v1.0/question/<q_id>', methods=['GET'])
+@app.route('/api/question/<q_id>', methods=['GET'])
 @cross_origin()
 def question(q_id):
     question = {}
@@ -198,7 +183,7 @@ def question(q_id):
     return jsonify({"question": question})
 
 
-@app.route('/gadfly/api/v1.0/good_question/<q_id>', methods=['POST'])
+@app.route('/api/good_question/<q_id>', methods=['POST'])
 @cross_origin()
 def good_question(q_id):
     try:
@@ -212,7 +197,7 @@ def good_question(q_id):
         return jsonify({"status": "failed"})
 
 
-@app.route('/gadfly/api/v1.0/bad_question/<q_id>', methods=['POST'])
+@app.route('/api/bad_question/<q_id>', methods=['POST'])
 @cross_origin()
 def bad_question(q_id):
     try:
@@ -226,12 +211,20 @@ def bad_question(q_id):
         return jsonify({"status": "failed"})
 
 
-@app.route('/gadfly/api/v1.0/article', methods=['GET'])
+@app.route('/api/article', methods=['GET'])
 @cross_origin()
 def get_article():
     url = request.args.get('url')
     article_text = get_article_text(url)
     return (article_text)
+
+
+@app.route('/api/top_sentences', methods=['GET'])
+@cross_origin()
+def get_top_sentences():
+    url = request.args.get('url')
+    article_text = get_article_text(url)
+    return jsonify(top_sentences(article_text))
 
 
 @app.errorhandler(404)
@@ -242,20 +235,22 @@ def not_found(error):
 def generate_gap_fill_questions(article_text):
     blank_types = [gfg.GapFillBlankType.named_entities]
     q_gen = gfg.GapFillGenerator(article_text, gap_types=blank_types)
-    return q_gen.output_questions_to_list()
+    return q_gen.output_questions()
 
 
 def generate_multiple_choice_questions(article_text):
     blank_types = [gfg.GapFillBlankType.named_entities]
     q_gen = mcq.MCQGenerator(article_text, gap_types=blank_types)
-    return q_gen.output_questions_to_list()
+    return q_gen.output_questions()
+
+
+def top_sentences(article_text):
+    blank_types = [gfg.GapFillBlankType.named_entities]
+    q_gen = qgen.QGenerator(article_text, gap_types=blank_types)
+    return q_gen._top_sents
 
 
 def get_article_text(url):
-    # up = urlparse(url)
-    # if (up.netloc == "www.nytimes.com"):
-        # url = re.sub("www.nytimes.com", "mobile.nytimes.com", url)
-        # print(url)
     article = Article(url, config)
     article.download()
     article.parse()
