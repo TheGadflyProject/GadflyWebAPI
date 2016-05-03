@@ -169,8 +169,8 @@ def get_multiple_choice_questions():
                 print("Unable to add item to database.")
                 print(e)
 
-    news_article = NewsArticle.query.get(article_id.hexdigest())
-    questions = question_schema.dump(news_article.questions.all()).data
+    # news_article = NewsArticle.query.get(article_id.hexdigest())
+    # questions = question_schema.dump(news_article.questions.all()).data
     shuffle(questions)
     return jsonify({
             'num_questions': min(limit, num_questions),
