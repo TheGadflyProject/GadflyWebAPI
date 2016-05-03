@@ -73,10 +73,13 @@ def get_gap_fill_questions():
         if not Question.query.get(q_id.hexdigest()):
             try:
                 db.session.add(
-                    Question(id=q_id.hexdigest(), question_text=q.get("question"),
+                    Question(id=q_id.hexdigest(),
+                             question_text=q.get("question"),
                              source_sentence=q.get("source_sentence"),
-                             correct_answer=q.get("answer"), good_question_votes=0,
-                             bad_question_votes=0, news_article_id=article_id.hexdigest())
+                             correct_answer=q.get("answer"),
+                             good_question_votes=0,
+                             bad_question_votes=0,
+                             news_article_id=article_id.hexdigest())
                 )
                 db.session.commit()
 
@@ -162,8 +165,8 @@ def get_multiple_choice_questions():
                 print("Unable to add item to database.")
                 print(e)
 
-    # news_article = NewsArticle.query.get(article_id.hexdigest())
-    # questions = question_schema.dump(news_article.questions.all()).data
+    news_article = NewsArticle.query.get(article_id.hexdigest())
+    questions = question_schema.dump(news_article.questions.all()).data
     return jsonify({
             'num_questions': num_questions,
             'questions': questions
@@ -224,7 +227,9 @@ def get_article():
 def get_top_sentences():
     url = request.args.get('url')
     article_text = get_article_text(url)
-    return jsonify(top_sentences(article_text))
+    g = gfg.GapFillGenerator(article_text)
+    top_sents = [sent.text for sent in g.top_sents]
+    return jsonify({"top_sents": top_sents})
 
 
 @app.errorhandler(404)
@@ -240,11 +245,6 @@ def generate_gap_fill_questions(article_text):
 def generate_multiple_choice_questions(article_text):
     q_gen = mcq.MCQGenerator(article_text)
     return q_gen.output_questions()
-
-
-def top_sentences(article_text):
-    q_gen = qgen.QGenerator(article_text)
-    return q_gen._top_sents
 
 
 def get_article_text(url):
