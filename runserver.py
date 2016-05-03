@@ -7,6 +7,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from urllib.parse import urlparse
 from hashlib import md5
+from random import shuffle
 import re
 import os
 import pprint
@@ -38,6 +39,7 @@ pp = pprint.PrettyPrinter(indent=4)
 @cross_origin()
 def get_gap_fill_questions():
     url = request.args.get('url')
+    limit = int(request.args.get('limit')) or 50
     article_text = get_article_text(url)
     questions = generate_gap_fill_questions(article_text)
     num_questions = len(questions)
@@ -89,9 +91,10 @@ def get_gap_fill_questions():
 
     news_article = NewsArticle.query.get(article_id.hexdigest())
     questions = question_schema.dump(news_article.questions.all()).data
+    shuffle(questions)
     return jsonify({
-            'num_questions': num_questions,
-            'questions': questions
+            'num_questions': min(limit, num_questions),
+            'questions': questions[:limit]
             })
 
 
@@ -100,6 +103,7 @@ def get_gap_fill_questions():
 @cross_origin()
 def get_multiple_choice_questions():
     url = request.args.get('url')
+    limit = int(request.args.get('limit')) or 50
     article_text = get_article_text(url)
     questions = generate_multiple_choice_questions(article_text)
     num_questions = len(questions)
@@ -167,9 +171,10 @@ def get_multiple_choice_questions():
 
     news_article = NewsArticle.query.get(article_id.hexdigest())
     questions = question_schema.dump(news_article.questions.all()).data
+    shuffle(questions)
     return jsonify({
-            'num_questions': num_questions,
-            'questions': questions
+            'num_questions': min(limit, num_questions),
+            'questions': questions[:limit]
             })
 
 
