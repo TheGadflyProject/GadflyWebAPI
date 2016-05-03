@@ -275,6 +275,8 @@ def clean_text(article):
     article = re.sub("’", "'", article)
     article = re.sub("Advertisement ", "", article)
     article = re.sub("Continue reading the main story", "", article)
+    # Should replace "Photo RIO DE JANEIRO — BRAZIL" with "Photo - Brazil"
+    article = re.sub("([A-Z]|\s)+\—", "", article)
     article = re.sub("Photo ", "", article)
     return re.sub("[\n*]", " ", article)
 
