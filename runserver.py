@@ -237,6 +237,16 @@ def get_top_sentences():
     return jsonify({"top_sents": top_sents})
 
 
+@app.route('/api/sentences', methods=['GET'])
+@cross_origin()
+def get_sentences():
+    url = request.args.get('url')
+    article_text = get_article_text(url)
+    g = gfg.GapFillGenerator(article_text)
+    sents = [sent.text for sent in g.sents]
+    return jsonify({"sents": sents})
+
+
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
