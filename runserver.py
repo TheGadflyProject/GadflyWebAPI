@@ -39,7 +39,7 @@ pp = pprint.PrettyPrinter(indent=4)
 @cross_origin()
 def get_gap_fill_questions():
     url = request.args.get('url')
-    limit = int(request.args.get('limit')) or 50
+    limit = int(request.args.get('limit') or 50)
     article_text = get_article_text(url)
     questions = generate_gap_fill_questions(article_text)
     num_questions = len(questions)
@@ -103,7 +103,7 @@ def get_gap_fill_questions():
 @cross_origin()
 def get_multiple_choice_questions():
     url = request.args.get('url')
-    limit = int(request.args.get('limit')) or 50
+    limit = int(request.args.get('limit') or 50)
     article_text = get_article_text(url)
     questions = generate_multiple_choice_questions(article_text)
     num_questions = len(questions)
