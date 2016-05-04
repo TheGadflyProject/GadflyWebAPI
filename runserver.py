@@ -275,11 +275,11 @@ def clean_text(article):
     article = re.sub("’", "'", article)
     article = re.sub("Advertisement ", "", article)
     article = re.sub("Continue reading the main story", "", article)
-    # Should replace "Photo RIO DE JANEIRO — BRAZIL" with "Photo - Brazil"
-    article = re.sub("([A-Z]|\s)+\—", "", article)
+    # Should replace "Photo RIO DE JANEIRO — BRAZIL" with "Photo - BRAZIL"
+    article = re.sub("(([A-Z]|\s)+\—)+?", "", article)
     # Should remove "Reporting by David Chance ; Editing by Peter Cooney"
-    article = re.sub("((Reporting by)||(Editing by))(\s\w+)+", "", article)
-    article = re.sub("Photo ", "", article)
+    article = re.sub("(Reporting|Editing)\sby(\s\w+)+", "", article)
+    article = re.sub("Photo\s", "", article)
     return re.sub("[\n*]", " ", article)
 
 
