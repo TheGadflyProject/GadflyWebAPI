@@ -8,6 +8,8 @@ from flask_marshmallow import Marshmallow
 from urllib.parse import urlparse
 from hashlib import md5
 from random import shuffle
+from bs4 import BeautifulSoup
+import requests
 import re
 import os
 import pprint
@@ -261,10 +263,30 @@ def generate_multiple_choice_questions(article_text):
 
 
 def get_article_text(url):
+    up = urlparse(url)
+    if (up.netloc == "www.nytimes.com") or (up.netloc == "mobile.nytimes.com"):
+        article = []
+        r = requests.get(url)
+        soup = BeautifulSoup(r.text, "lxml")
+
+        known_text = False
+        for each in soup.findAll("p", class_="story-body-text story-content"):
+            full_string = []
+            for string in each.stripped_strings:
+                full_string.append(string)
+            article.append(" ".join(full_string))
+            known_text = True
+        title = soup.title.string
+        if known_text:
+            article = " ".join(article)
+            return clean_text(article)
+
     article = Article(url, config)
     article.download()
     article.parse()
-    return clean_text(article.text)
+    article = article.text
+
+    return clean_text(article)
 
 
 def clean_text(article):
