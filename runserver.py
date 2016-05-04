@@ -227,16 +227,6 @@ def get_article():
     return (article_text)
 
 
-@app.route('/api/top_sentences', methods=['GET'])
-@cross_origin()
-def get_top_sentences():
-    url = request.args.get('url')
-    article_text = get_article_text(url)
-    g = gfg.GapFillGenerator(article_text)
-    top_sents = [sent.text for sent in g.top_sents]
-    return jsonify({"top_sents": top_sents})
-
-
 @app.route('/api/sentences', methods=['GET'])
 @cross_origin()
 def get_sentences():
@@ -244,7 +234,15 @@ def get_sentences():
     article_text = get_article_text(url)
     g = gfg.GapFillGenerator(article_text)
     sents = [sent.text for sent in g.sents]
-    return jsonify({"sents": sents})
+    top_sent_idx = []
+    top_sents = []
+    for top_sent in [sent.text for sent in g.top_sents]:
+        for i, sent in enumerate(g.sents):
+            if sent.text == top_sent:
+                top_sent_idx.append(i)
+                top_sents.append(top_sent)
+
+    return jsonify({"sents": sents, "top_sent_idx": top_sent_idx, "top_sents": top_sents})
 
 
 @app.errorhandler(404)
