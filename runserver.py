@@ -278,7 +278,7 @@ def clean_text(article):
     # Should remove "Reporting by David Chance ; Editing by Peter Cooney"
     article = re.sub("(Reporting|Editing)\sby(\s\w+)+", "", article)
     article = re.sub("Photo\s", "", article)
-    return re.sub("[\n*]", " ", article)
+    return re.sub("[\s*]", " ", article)
 
 
 if __name__ == '__main__':
