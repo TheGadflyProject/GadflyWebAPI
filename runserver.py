@@ -248,7 +248,7 @@ def get_raw_article():
         title = soup.title.string
         if known_text:
             article = " ".join(article)
-            return clean_text(article)
+            return (article)
 
     article = Article(url, config)
     article.download()
@@ -324,7 +324,7 @@ def clean_text(article):
     article = re.sub("Advertisement ", "", article)
     article = re.sub("Continue reading the main story", "", article)
     # Should replace "Photo RIO DE JANEIRO — BRAZIL" with "Photo - BRAZIL"
-    article = re.sub("(([A-Za-z,]|\s)+\—)+?", "", article)
+    article = re.sub("^(([A-Za-z,]|\s)+\—)+?", "", article)
     # Should remove "Reporting by David Chance ; Editing by Peter Cooney"
     article = re.sub("(Reporting|Editing)\sby(\s\w+)+", "", article)
     article = re.sub("Photo\s", "", article)
