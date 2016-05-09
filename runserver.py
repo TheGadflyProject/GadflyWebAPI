@@ -228,6 +228,34 @@ def get_article():
     article_text = get_article_text(url)
     return (article_text)
 
+@app.route('/api/raw_article', methods=['GET'])
+@cross_origin()
+def get_raw_article():
+    url = request.args.get('url')
+    up = urlparse(url)
+    if (up.netloc == "www.nytimes.com") or (up.netloc == "mobile.nytimes.com"):
+        article = []
+        r = requests.get(url)
+        soup = BeautifulSoup(r.text, "lxml")
+
+        known_text = False
+        for each in soup.findAll("p", class_="story-body-text story-content"):
+            full_string = []
+            for string in each.stripped_strings:
+                full_string.append(string)
+            article.append(" ".join(full_string))
+            known_text = True
+        title = soup.title.string
+        if known_text:
+            article = " ".join(article)
+            return clean_text(article)
+
+    article = Article(url, config)
+    article.download()
+    article.parse()
+    return article.text
+
+
 
 @app.route('/api/sentences', methods=['GET'])
 @cross_origin()
