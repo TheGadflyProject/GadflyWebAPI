@@ -275,6 +275,22 @@ def get_sentences():
     return jsonify({"sents": sents, "top_sent_idx": top_sent_idx, "top_sents": top_sents})
 
 
+@app.route('/api/entities', methods=['GET'])
+@cross_origin()
+def get_entities():
+    url = request.args.get('url')
+    article_text = get_article_text(url)
+    g = mcq.MCQGenerator(article_text)
+    ents = [(ent.text, ent.label_) for ent in g.parsed_text.ents]
+    ent_dict = {}
+    for ent in ents:
+        if ent[1] in ent_dict:
+            ent_dict[ent[1]].append(ent[0])
+        else:
+            ent_dict[ent[1]] = [ent[0]]
+    return jsonify({"entities": ent_dict})
+
+
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
