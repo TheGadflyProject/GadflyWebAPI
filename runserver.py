@@ -228,6 +228,7 @@ def get_article():
     article_text = get_article_text(url)
     return (article_text)
 
+
 @app.route('/api/raw_article', methods=['GET'])
 @cross_origin()
 def get_raw_article():
@@ -262,7 +263,7 @@ def get_raw_article():
 def get_sentences():
     url = request.args.get('url')
     article_text = get_article_text(url)
-    g = gfg.GapFillGenerator(article_text)
+    g = mcq.MCQGenerator(article_text)
     sents = [sent.text for sent in g.sents]
     top_sent_idx = []
     top_sents = []
