@@ -291,6 +291,18 @@ def get_entities():
     return jsonify({"entities": ent_dict})
 
 
+@app.route('/api/article_info', methods=['GET'])
+@cross_origin()
+def get_article_info():
+    url = request.args.get('url')
+    article = Article(url, config)
+    article.download()
+    article.parse()
+
+    return jsonify({"article_info": {"title": article.title }})
+
+
+
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
